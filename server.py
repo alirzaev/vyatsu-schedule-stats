@@ -3,7 +3,7 @@ from os import getenv
 import bottle
 
 from stats import stats_api_daily, stats_api_monthly, stats_tg_daily, \
-    stats_tg_monthly
+    stats_tg_monthly, stats_v_monthly, stats_v_daily
 
 USERNAME = getenv('USERNAME')
 PASSWORD = getenv('PASSWORD')
@@ -48,6 +48,25 @@ def index():
     else:
         daily = stats_tg_daily()
         monthly = stats_tg_monthly()
+
+        head = ('Команды', 'Кол-во')
+
+        tables = [
+            dict(head=head, body=daily),
+            dict(head=head, body=monthly)
+        ]
+        return dict(name=cookie, tables=tables)
+
+
+@bottle.get('/viber')
+@bottle.view('viber')
+def index():
+    cookie = get_cookie()
+    if cookie is None:
+        bottle.redirect('/login')
+    else:
+        daily = stats_v_daily()
+        monthly = stats_v_monthly()
 
         head = ('Команды', 'Кол-во')
 

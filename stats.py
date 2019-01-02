@@ -5,6 +5,7 @@ from pymongo import MongoClient
 from os import getenv
 
 _API_CLIENT = MongoClient(getenv('MONGODB_URI'))
+_TG_CLIENT = MongoClient(getenv('TG_MONGODB_URI'))
 
 
 def _iso_date(d):
@@ -88,6 +89,42 @@ def _api_schedule(begin: date, end: date):
     return [(item['_id'], item['count']) for item in data]
 
 
+def _tg_commands(begin: date, end: date):
+    data = _TG_CLIENT.get_database().get_collection('visits').aggregate([
+        {
+            '$match': {
+                'date': {
+                    '$gte': _iso_date(begin),
+                    '$lt': _iso_date(end)
+                }
+            }
+        },
+        {
+            '$match': {
+                'type': 'MESSAGE',
+                'data': {
+                    '$regex': re.compile(r'^/.*')
+                }
+            }
+        },
+        {
+            '$group': {
+                '_id': '$data',
+                'count': {
+                    '$sum': 1
+                }
+            }
+        },
+        {
+            '$sort': {
+                'count': -1
+            }
+        }
+    ])
+
+    return [(item['_id'], item['count']) for item in data]
+
+
 def stats_api_daily():
     begin = date.today()
     end = date.today() + timedelta(days=1)
@@ -103,3 +140,18 @@ def stats_api_monthly():
 
     return (_api_endpoints(begin, end),
             _api_schedule(begin, end))
+
+
+def stats_tg_daily():
+    begin = date.today()
+    end = date.today() + timedelta(days=1)
+
+    return _tg_commands(begin, end)
+
+
+def stats_tg_monthly():
+    today = date.today()
+    begin = date(today.year, today.month, 1)
+    end = date.today() + timedelta(days=1)
+
+    return _tg_commands(begin, end)

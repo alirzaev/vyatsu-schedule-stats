@@ -62,4 +62,4 @@ def logout():
     bottle.redirect('/')
 
 
-bottle.run(host='localhost', port=8080)
+bottle.run(host='localhost', port=80)

@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "server.py"]
+CMD ["sh", "-c", "gunicorn -b '0.0.0.0:80' server:app"]

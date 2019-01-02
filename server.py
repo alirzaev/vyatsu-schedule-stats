@@ -62,4 +62,7 @@ def logout():
     bottle.redirect('/')
 
 
-bottle.run(host='localhost', port=80)
+if __name__ == '__main__':
+    bottle.run(host='localhost', port=8080)
+else:
+    app = bottle.default_app()

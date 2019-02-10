@@ -1,16 +1,15 @@
-from os import getenv
+from os import getenv, path
 
 import bottle
 
 from stats import stats_api_daily, stats_api_monthly, stats_tg_daily, \
     stats_tg_monthly, stats_v_monthly, stats_v_daily
 
-USERNAME = getenv('USERNAME')
-PASSWORD = getenv('PASSWORD')
+BASE_URL = getenv('BASE_URL')
 
-
-def get_cookie():
-    return bottle.request.get_cookie('cookie', None)
+app_dir = path.dirname(path.realpath(__file__))
+views_dir = path.join(app_dir, 'views')
+bottle.TEMPLATE_PATH.insert(0, views_dir)
 
 
 @bottle.error(404)
@@ -18,87 +17,51 @@ def error(error):
     return bottle.template('404')
 
 
-@bottle.get('/')
+@bottle.get(f'/{BASE_URL}')
 @bottle.view('api')
 def index():
-    cookie = get_cookie()
-    if cookie is None:
-        bottle.redirect('/login')
-    else:
-        daily = stats_api_daily()
-        monthly = stats_api_monthly()
+    daily = stats_api_daily()
+    monthly = stats_api_monthly()
 
-        head = ('API endpoints', 'Кол-во')
+    head = ('API endpoints', 'Кол-во')
 
-        tables = [
-            dict(head=head, body=daily[0]),
-            dict(head=head, body=daily[1]),
-            dict(head=head, body=monthly[0]),
-            dict(head=head, body=monthly[1])
-        ]
-        return dict(name=cookie, tables=tables)
+    tables = [
+        dict(head=head, body=daily[0]),
+        dict(head=head, body=daily[1]),
+        dict(head=head, body=monthly[0]),
+        dict(head=head, body=monthly[1])
+    ]
+    return dict(tables=tables, base_url=BASE_URL)
 
 
-@bottle.get('/telegram')
+@bottle.get(f'/{BASE_URL}/telegram')
 @bottle.view('telegram')
 def index():
-    cookie = get_cookie()
-    if cookie is None:
-        bottle.redirect('/login')
-    else:
-        daily = stats_tg_daily()
-        monthly = stats_tg_monthly()
+    daily = stats_tg_daily()
+    monthly = stats_tg_monthly()
 
-        head = ('Команды', 'Кол-во')
+    head = ('Команды', 'Кол-во')
 
-        tables = [
-            dict(head=head, body=daily),
-            dict(head=head, body=monthly)
-        ]
-        return dict(name=cookie, tables=tables)
+    tables = [
+        dict(head=head, body=daily),
+        dict(head=head, body=monthly)
+    ]
+    return dict(tables=tables, base_url=BASE_URL)
 
 
-@bottle.get('/viber')
+@bottle.get(f'/{BASE_URL}/viber')
 @bottle.view('viber')
 def index():
-    cookie = get_cookie()
-    if cookie is None:
-        bottle.redirect('/login')
-    else:
-        daily = stats_v_daily()
-        monthly = stats_v_monthly()
+    daily = stats_v_daily()
+    monthly = stats_v_monthly()
 
-        head = ('Команды', 'Кол-во')
+    head = ('Команды', 'Кол-во')
 
-        tables = [
-            dict(head=head, body=daily),
-            dict(head=head, body=monthly)
-        ]
-        return dict(name=cookie, tables=tables)
-
-
-@bottle.get('/login')
-@bottle.view('login')
-def login():
-    return dict(name=get_cookie())
-
-
-@bottle.post('/login')
-def login():
-    username = bottle.request.forms['username']
-    password = bottle.request.forms['password']
-
-    if username == USERNAME and password == PASSWORD:
-        bottle.response.set_cookie('cookie', 'logged_in')
-        bottle.redirect('/')
-    else:
-        bottle.abort(401, 'Неверное имя пользователя или пароль')
-
-
-@bottle.post('/logout')
-def logout():
-    bottle.response.delete_cookie('cookie')
-    bottle.redirect('/')
+    tables = [
+        dict(head=head, body=daily),
+        dict(head=head, body=monthly)
+    ]
+    return dict(tables=tables, base_url=BASE_URL)
 
 
 if __name__ == '__main__':

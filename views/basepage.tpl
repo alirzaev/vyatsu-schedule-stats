@@ -28,21 +28,16 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="/">API</a>
+                <a class="nav-link" href="/{{base_url}}">API</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/telegram">Telegram</a>
+                <a class="nav-link" href="/{{base_url}}/telegram">Telegram</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/viber">Viber</a>
+                <a class="nav-link" href="/{{base_url}}/viber">Viber</a>
             </li>
         </ul>
     </div>
-    % if defined('name') and get('name') is not None:
-    <form class="form-inline" action="/logout" method="post">
-        <button class="btn btn-danger" type="submit">Выйти</button>
-    </form>
-    % end
 </nav>
 <div class="container">
     <div class="row justify-content-center">

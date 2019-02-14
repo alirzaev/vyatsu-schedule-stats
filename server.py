@@ -18,50 +18,37 @@ def error(error):
 
 
 @bottle.get(f'/{BASE_URL}')
-@bottle.view('api')
+@bottle.view('index')
 def index():
-    daily = stats_api_daily()
-    monthly = stats_api_monthly()
-
-    head = ('API endpoints', 'Кол-во')
-
-    tables = [
-        dict(head=head, body=daily[0]),
-        dict(head=head, body=daily[1]),
-        dict(head=head, body=monthly[0]),
-        dict(head=head, body=monthly[1])
+    api_daily = stats_api_daily()
+    api_monthly = stats_api_monthly()
+    api_head = ('API endpoints', 'Кол-во')
+    api_tables = [
+        dict(head=api_head, body=api_daily[0]),
+        dict(head=api_head, body=api_daily[1]),
+        dict(head=api_head, body=api_monthly[0]),
+        dict(head=api_head, body=api_monthly[1])
     ]
-    return dict(tables=tables, base_url=BASE_URL)
 
-
-@bottle.get(f'/{BASE_URL}/telegram')
-@bottle.view('telegram')
-def index():
-    daily = stats_tg_daily()
-    monthly = stats_tg_monthly()
-
-    head = ('Команды', 'Кол-во')
-
-    tables = [
-        dict(head=head, body=daily),
-        dict(head=head, body=monthly)
+    tg_daily = stats_tg_daily()
+    tg_monthly = stats_tg_monthly()
+    tg_head = ('Команды', 'Кол-во')
+    tg_tables = [
+        dict(head=tg_head, body=tg_daily),
+        dict(head=tg_head, body=tg_monthly)
     ]
-    return dict(tables=tables, base_url=BASE_URL)
 
-
-@bottle.get(f'/{BASE_URL}/viber')
-@bottle.view('viber')
-def index():
-    daily = stats_v_daily()
-    monthly = stats_v_monthly()
-
-    head = ('Команды', 'Кол-во')
-
-    tables = [
-        dict(head=head, body=daily),
-        dict(head=head, body=monthly)
+    v_daily = stats_v_daily()
+    v_monthly = stats_v_monthly()
+    v_head = ('Команды', 'Кол-во')
+    v_tables = [
+        dict(head=v_head, body=v_daily),
+        dict(head=v_head, body=v_monthly)
     ]
-    return dict(tables=tables, base_url=BASE_URL)
+
+    return dict(api_tables=api_tables,
+                tg_tables=tg_tables,
+                v_tables=v_tables)
 
 
 if __name__ == '__main__':

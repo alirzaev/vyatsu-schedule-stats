@@ -17,12 +17,14 @@ bottle.TEMPLATE_PATH.insert(0, views_dir)
 def index():
     api_daily = stats_api_daily()
     api_monthly = stats_api_monthly()
+    total_daily = ('Всего', sum(t[1] for t in api_daily[1]))
+    total_monthly = ('Всего', sum(t[1] for t in api_monthly[1]))
     api_head = ('API endpoints', 'Кол-во')
     api_tables = [
         dict(head=api_head, body=api_daily[0]),
-        dict(head=api_head, body=api_daily[1]),
+        dict(head=api_head, body=api_daily[1][:5] + [total_daily]),
         dict(head=api_head, body=api_monthly[0]),
-        dict(head=api_head, body=api_monthly[1])
+        dict(head=api_head, body=api_monthly[1][:5] + [total_monthly])
     ]
 
     tg_daily = stats_tg_daily()
@@ -42,6 +44,7 @@ def index():
     ]
 
     return dict(api_tables=api_tables,
+                api_schedules_total=(total_daily, total_monthly),
                 tg_tables=tg_tables,
                 v_tables=v_tables)
 

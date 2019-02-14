@@ -81,9 +81,6 @@ def _api_schedule(begin: date, end: date):
             '$sort': {
                 'count': -1
             }
-        },
-        {
-            '$limit': 5
         }
     ])
 

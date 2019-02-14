@@ -12,11 +12,6 @@ views_dir = path.join(app_dir, 'views')
 bottle.TEMPLATE_PATH.insert(0, views_dir)
 
 
-@bottle.error(404)
-def error(error):
-    return bottle.template('404')
-
-
 @bottle.get(f'/{BASE_URL}')
 @bottle.view('index')
 def index():

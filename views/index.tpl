@@ -18,15 +18,23 @@
 
 % include('table.tpl', data=api_tables[1])
 
+<h3 class="pt-1">Часто загружаемые кафедры</h3>
+
+% include('table.tpl', data=api_tables[2])
+
 <h2 class="pt-1">Статистика за месяц</h2>
 
 <h3>Вызовы API</h3>
 
-% include('table.tpl', data=api_tables[2])
+% include('table.tpl', data=api_tables[3])
 
 <h3 class="pt-1">Часто загружаемые расписания</h3>
 
-% include('table.tpl', data=api_tables[3])
+% include('table.tpl', data=api_tables[4])
+
+<h3 class="pt-1">Часто загружаемые кафедры</h3>
+
+% include('table.tpl', data=api_tables[5])
 
 <hr>
 

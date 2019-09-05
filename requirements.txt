@@ -1,3 +1,5 @@
-bottle
-pymongo
-gunicorn
+django==2.1
+psycopg2==2.7.7
+gunicorn==19.9
+django_heroku==0.3
+pymongo==3.9

@@ -24,4 +24,4 @@ COPY . .
 
 RUN python manage.py collectstatic --no-input
 
-CMD ["sh", "-c", "gunicorn -b '0.0.0.0:80' vsstatsproject.wsgi:application"]
+CMD gunicorn -b 0.0.0.0:$PORT vsstatsproject.wsgi:application

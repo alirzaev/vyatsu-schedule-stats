@@ -1,0 +1,13 @@
+{% extends "vsstats/base.html" %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+    <h1>Ресурсы</h1>
+    <div class="d-flex flex-column align-items-start">
+    {% for source in sources %}
+        <a
+                href="{% url 'sources' source.id %}"
+                class="mb-2 mb-sm-1"
+        >{{ source.name }}</a>
+    {% endfor %}
+    </div>
+{% endblock %}

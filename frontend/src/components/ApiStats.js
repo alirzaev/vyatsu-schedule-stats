@@ -37,12 +37,16 @@ export default ({stats}) => {
                     </tr>
                     </thead>
                     <tbody>
-                    {stats.schedules.map(({schedule, count}) => (
+                    {stats.schedules.top.map(({schedule, count}) => (
                         <tr>
                             <td>{schedule}</td>
                             <td>{count}</td>
                         </tr>
                     ))}
+                    <tr>
+                        <td className="font-weight-bold">Всего:</td>
+                        <td>{stats.schedules.total}</td>
+                    </tr>
                     </tbody>
                 </table>
             </details>
@@ -60,12 +64,16 @@ export default ({stats}) => {
                     </tr>
                     </thead>
                     <tbody>
-                    {stats.departments.map(({department, count}) => (
+                    {stats.departments.top.map(({department, count}) => (
                         <tr>
                             <td>{department}</td>
                             <td>{count}</td>
                         </tr>
                     ))}
+                    <tr>
+                        <td className="font-weight-bold">Всего:</td>
+                        <td>{stats.departments.total}</td>
+                    </tr>
                     </tbody>
                 </table>
             </details>

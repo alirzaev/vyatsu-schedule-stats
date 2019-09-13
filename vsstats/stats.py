@@ -11,141 +11,121 @@ def _iso_date(d):
     return datetime.fromisoformat(d.isoformat())
 
 
-def _api_endpoints(url: str, begin: date, end: date):
-    data = MongoClient(url).get_database().get_collection('logs').aggregate([
-        {
-            '$match': {
-                'date': {
-                    '$gte': _iso_date(begin),
-                    '$lt': _iso_date(end)
-                }
+def _filter_by_date(begin: date, end: date):
+    return {
+        '$match': {
+            'date': {
+                '$gte': _iso_date(begin),
+                '$lt': _iso_date(end)
             }
-        },
-        {
-            '$match': {
-                'path': {
-                    '$regex': re.compile('/api/(v2|v1)/(?!schedule|department(?!s))')
-                }
+        }
+    }
+
+
+def _filter_by_regex(field: str, regex):
+    return {
+        '$match': {
+            f'{field}': {
+                '$regex': regex
             }
-        },
-        {
+        }
+    }
+
+
+def _filter_by_str(field: str, substr):
+    return {
+        '$match': {
+            f'{field}': substr
+        }
+    }
+
+
+def _sort_by(field: str, direction: int):
+    return {
+        '$sort': {
+            f'{field}': direction
+        }
+    }
+
+
+def _group_by_url(field: str):
+    return {
             '$group': {
                 '_id': {
-                    "$substr": ["$path", 0, {"$indexOfBytes": ["$path", "?"]}]
+                    "$substr": [f"${field}", 0, {"$indexOfBytes": [f"${field}", "?"]}]
                 },
                 'count': {
                     '$sum': 1
                 }
             }
-        },
-        {
-            '$sort': {
-                '_id': 1
-            }
         }
+
+
+def _limit(limit: int):
+    return {
+        '$limit': limit
+    }
+
+
+def _api_endpoints(url: str, begin: date, end: date):
+    data = MongoClient(url).get_database().get_collection('logs').aggregate([
+        _filter_by_date(begin, end),
+        _filter_by_regex(
+            'path', re.compile('/api/(v2|v1)/(?!schedule|department(?!s))')),
+        _group_by_url('path'),
+        _sort_by('_id', 1)
     ])
 
     return [{'endpoint': item['_id'], 'count': item['count']} for item in data]
 
 
-def _api_schedule(url: str, begin: date, end: date):
-    data = MongoClient(url).get_database().get_collection('logs').aggregate([
-        {
-            '$match': {
-                'date': {
-                    '$gte': _iso_date(begin),
-                    '$lt': _iso_date(end)
-                }
-            }
-        },
-        {
-            '$match': {
-                'path': {
-                    '$regex': re.compile('/api/(v2|v1)/schedule')
-                }
-            }
-        },
-        {
-            '$group': {
-                '_id': {
-                    "$substr": ["$path", 0, {"$indexOfBytes": ["$path", "?"]}]
-                },
-                'count': {
-                    '$sum': 1
-                }
-            }
-        },
-        {
-            '$sort': {
-                'count': -1
-            }
-        },
-        {
-            '$limit': 10
-        }
-    ])
+def _api_schedules(url: str, begin: date, end: date):
+    pipeline = [
+        _filter_by_date(begin, end),
+        _filter_by_regex('path', re.compile('/api/(v2|v1)/schedule')),
+        _group_by_url('path'),
+        _sort_by('count', -1)
+    ]
+    logs = MongoClient(url).get_database().get_collection('logs')
 
-    return [{'schedule': item['_id'], 'count': item['count']} for item in data]
+    top = [{
+        'schedule': item['_id'],
+        'count': item['count']
+    } for item in logs.aggregate(pipeline + [_limit(10)])]
+    total = sum(item['count'] for item in logs.aggregate(pipeline))
+
+    return {
+        'top': top,
+        'total': total
+    }
 
 
 def _api_departments(url: str, begin: date, end: date):
-    data = MongoClient(url).get_database().get_collection('logs').aggregate([
-        {
-            '$match': {
-                'date': {
-                    '$gte': _iso_date(begin),
-                    '$lt': _iso_date(end)
-                }
-            }
-        },
-        {
-            '$match': {
-                'path': {
-                    '$regex': re.compile('/api/(v2|v1)/department(?!s)')
-                }
-            }
-        },
-        {
-            '$group': {
-                '_id': {
-                    "$substr": ["$path", 0, {"$indexOfBytes": ["$path", "?"]}]
-                },
-                'count': {
-                    '$sum': 1
-                }
-            }
-        },
-        {
-            '$sort': {
-                'count': -1
-            }
-        },
-        {
-            '$limit': 10
-        }
-    ])
+    pipeline = [
+        _filter_by_date(begin, end),
+        _filter_by_regex('path', re.compile('/api/(v2|v1)/department(?!s)')),
+        _group_by_url('path'),
+        _sort_by('count', -1)
+    ]
+    logs = MongoClient(url).get_database().get_collection('logs')
 
-    return [{'department': item['_id'], 'count': item['count']} for item in data]
+    top = [{
+        'department': item['_id'],
+        'count': item['count']
+    } for item in logs.aggregate(pipeline + [_limit(10)])]
+    total = sum(item['count'] for item in logs.aggregate(pipeline))
+
+    return {
+        'top': top,
+        'total': total
+    }
 
 
 def _tg_commands(url: str, begin: date, end: date):
     data = MongoClient(url).get_database().get_collection('visits').aggregate([
-        {
-            '$match': {
-                'date': {
-                    '$gte': _iso_date(begin),
-                    '$lt': _iso_date(end)
-                }
-            }
-        },
-        {
-            '$match': {
-                'type': 'MESSAGE',
-                'data': {
-                    '$regex': re.compile(r'^/.*')
-                }
-            }
-        },
+        _filter_by_date(begin, end),
+        _filter_by_str('type', 'MESSAGE'),
+        _filter_by_regex('data', re.compile(r'^/.*')),
         {
             '$group': {
                 '_id': '$data',
@@ -154,11 +134,7 @@ def _tg_commands(url: str, begin: date, end: date):
                 }
             }
         },
-        {
-            '$sort': {
-                'count': -1
-            }
-        }
+        _sort_by('count', -1),
     ])
 
     return [{'command': item['_id'], 'count': item['count']} for item in data]
@@ -166,80 +142,24 @@ def _tg_commands(url: str, begin: date, end: date):
 
 def _tg_users(url, begin, end):
     data = MongoClient(url).get_database().get_collection('visits').aggregate([
-        {
-            '$match': {
-                'date': {
-                    '$gte': _iso_date(begin),
-                    '$lt': _iso_date(end)
-                }
-            }
-        },
-        {
-            '$match': {
-                'data': {
-                    '$regex': re.compile(r'^/.*')
-                }
-            }
-        },
+        _filter_by_date(begin, end),
+        _filter_by_regex('data', re.compile(r'^/.*')),
         {
             '$group': {
                 '_id': '$telegram_id'
             }
-        },
-        {
-            '$count': 'users'
         }
     ])
 
-    t = tuple(data)
-    if len(t) > 0:
-        return t[0]['users']
-    else:
-        return 0
+    return len(tuple(data))
 
 
 def stats_api(url, begin, end):
     return {'endpoints': _api_endpoints(url, begin, end),
-            'schedules': _api_schedule(url, begin, end),
+            'schedules': _api_schedules(url, begin, end),
             'departments': _api_departments(url, begin, end)}
 
 
 def stats_tg(url, begin, end):
-    return {'commands': _tg_commands(url, begin, end),
-            'users': _tg_users(url, begin, end)}
-
-
-def stats_api_daily(url):
-    begin = date.today()
-    end = date.today() + timedelta(days=1)
-
-    return {'endpoints': _api_endpoints(url, begin, end),
-            'schedules': _api_schedule(url, begin, end),
-            'departments': _api_departments(url, begin, end)}
-
-
-def stats_api_monthly(url):
-    today = date.today()
-    begin = date(today.year, today.month, 1)
-    end = date.today() + timedelta(days=1)
-
-    return {'endpoints': _api_endpoints(url, begin, end),
-            'schedules': _api_schedule(url, begin, end),
-            'departments': _api_departments(url, begin, end)}
-
-
-def stats_tg_daily(url):
-    begin = date.today()
-    end = date.today() + timedelta(days=1)
-
-    return {'commands': _tg_commands(url, begin, end),
-            'users': _tg_users(url, begin, end)}
-
-
-def stats_tg_monthly(url):
-    today = date.today()
-    begin = date(today.year, today.month, 1)
-    end = date.today() + timedelta(days=1)
-
     return {'commands': _tg_commands(url, begin, end),
             'users': _tg_users(url, begin, end)}

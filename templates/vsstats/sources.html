@@ -1,7 +1,7 @@
 {% extends "vsstats/base.html" %}
 {% block title %}Статистика{% endblock %}
 {% block content %}
-    <h1>{{ name }}</h1>
+    <h1 class="text-center">{{ name }}</h1>
     <div id="root"></div>
     {% load static %}
     <script src="{% static "vsstats.js" %}" defer></script>

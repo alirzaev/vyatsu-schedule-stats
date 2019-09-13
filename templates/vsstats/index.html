@@ -1,8 +1,8 @@
 {% extends "vsstats/base.html" %}
 {% block title %}Статистика{% endblock %}
 {% block content %}
-    <h1>Ресурсы</h1>
-    <div class="d-flex flex-column align-items-start">
+    <h1 class="text-center">Ресурсы</h1>
+    <div class="d-flex flex-column align-items-center">
     {% for source in sources %}
         <a
                 href="{% url 'sources' source.id %}"

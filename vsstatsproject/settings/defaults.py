@@ -42,6 +42,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'vsstatsproject.wsgi.application'
 
+LOGIN_REDIRECT_URL = 'vsstats:index'
+
+LOGOUT_REDIRECT_URL = 'vsstats:index'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

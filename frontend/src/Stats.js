@@ -42,14 +42,8 @@ class Stats extends React.Component {
 
     render() {
         const status = this.props.status;
-        if (this.props.status === 'FAILED') {
-            return <span>Ошибка</span>;
-        } else {
-            const {type, stats, begin, end} = this.props.data;
-
-            return (
-                <React.Fragment>
-                    <form onSubmit={(e) => this.getStats(e)} className="mb-2">
+        const DateForm = ({begin, end}) => (
+            <form onSubmit={(e) => this.getStats(e)} className="mb-2">
                         <DateRangePicker
                             onChange={(v) => this.updateField(v, 'range')}
                             required={true}
@@ -60,13 +54,33 @@ class Stats extends React.Component {
                             className="btn btn-primary"
                         >Загрузить</button>
                     </form>
-                    {status === 'LOADING' ?
-                        <Loader/> :
-                        (type === 'API' ?
-                                <ApiStats stats={stats}/> :
-                                <TgBotStats stats={stats}/>
-                        )
-                    }
+        );
+
+        if (status === 'FAILED') {
+            return (
+                <div className="alert alert-danger" role="alert">
+                    <h4 className="alert-heading">Ошибка</h4>
+                    <p>Не удалось загрузить данные. Попробуйте обновить страницу.</p>
+                </div>
+            );
+        } else if (status === 'LOADING') {
+            const {begin, end} = this.props.data || this.state.range;
+
+            return (
+                <React.Fragment>
+                    <DateForm begin={begin} end={end}/>
+                    <Loader/>
+                </React.Fragment>
+            );
+        } else {
+            const {type, stats, begin, end} = this.props.data;
+
+            return (
+                <React.Fragment>
+                    <DateForm begin={begin} end={end}/>
+                    {type === 'API' ?
+                        <ApiStats stats={stats}/> :
+                        <TgBotStats stats={stats}/>}
                 </React.Fragment>
             );
         }

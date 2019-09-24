@@ -5,7 +5,7 @@
     <div class="d-flex flex-column align-items-center">
     {% for source in sources %}
         <a
-                href="{% url 'sources' source.id %}"
+                href="{% url 'vsstats:sources' source.id %}"
                 class="mb-2 mb-sm-1"
         >{{ source.name }}</a>
     {% endfor %}

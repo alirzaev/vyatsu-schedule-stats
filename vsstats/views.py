@@ -1,6 +1,8 @@
 import datetime
 
+from django.contrib.auth import get_user
 from django.http import JsonResponse, Http404
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import Source
 from . import stats
@@ -14,6 +16,7 @@ def index(request):
     })
 
 
+@login_required
 def sources(request, source_id):
     source = Source.objects.get(pk=source_id)
     return render(request, 'vsstats/sources.html', context={
@@ -22,6 +25,10 @@ def sources(request, source_id):
 
 
 def api_stats(request, source_id):
+    user = get_user(request)
+    if user is None or user.is_anonymous:
+        return JsonResponse({'error': 'AUTH_REQUIRED'}, status=401)
+
     data = request.GET
     if 'begin' in data and 'end' in data:
         begin = datetime.date.fromisoformat(data['begin'])

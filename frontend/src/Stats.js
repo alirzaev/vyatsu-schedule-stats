@@ -42,12 +42,13 @@ class Stats extends React.Component {
 
     render() {
         const status = this.props.status;
-        const DateForm = ({begin, end}) => (
+        const DateForm = ({begin, end, disabled}) => (
             <form onSubmit={(e) => this.getStats(e)} className="mb-2">
                         <DateRangePicker
                             onChange={(v) => this.updateField(v, 'range')}
                             required={true}
                             defaultValue={{begin, end}}
+                            disabled={disabled}
                         />
                         <button
                             type="submit"
@@ -64,16 +65,17 @@ class Stats extends React.Component {
                 </div>
             );
         } else if (status === 'LOADING') {
-            const {begin, end} = this.props.data || this.state.range;
+            const {begin, end} = this.state.range || this.props.data;
 
             return (
                 <React.Fragment>
-                    <DateForm begin={begin} end={end}/>
+                    <DateForm begin={begin} end={end} disabled={true}/>
                     <Loader/>
                 </React.Fragment>
             );
         } else {
-            const {type, stats, begin, end} = this.props.data;
+            const {type, stats} = this.props.data;
+            const {begin, end} = this.state.range || this.props.data;
 
             return (
                 <React.Fragment>

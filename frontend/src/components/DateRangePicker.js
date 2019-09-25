@@ -40,6 +40,7 @@ export default class DateRangePicker extends React.Component {
                         defaultValue={this.props.defaultValue.begin}
                         onChange={(e) => this.updateField(e, 'begin')}
                         required={this.props.required}
+                        disabled={this.props.disabled || false}
                     />
                 </div>
                 <div className="form-group row">
@@ -55,6 +56,7 @@ export default class DateRangePicker extends React.Component {
                         defaultValue={this.props.defaultValue.end}
                         onChange={(e) => this.updateField(e, 'end')}
                         required={this.props.required}
+                        disabled={this.props.disabled || false}
                     />
                 </div>
             </div>

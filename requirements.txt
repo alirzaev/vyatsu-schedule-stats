@@ -1,4 +1,4 @@
-django==2.2
+django==2.2.8
 psycopg2==2.7.7
 gunicorn==19.9
 django_heroku==0.3
